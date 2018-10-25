@@ -4,7 +4,7 @@ const {
     message
 } = require('antd');
 
-export const base_url = 'http://localhost:9000';
+export const base_url = 'https://graymerge.herokuapp.com';
 export const APICall = (url, method = 'GET', data = null) => {
     let fetchData = {
         method: method,
