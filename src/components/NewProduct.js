@@ -6,7 +6,7 @@ import {
     Select,
     Row,
     Col,
-
+    Spin,
     message,
     Button,
 
@@ -32,22 +32,30 @@ class NewProduct extends Component {
             visible: false,
             prodctImages: [],
             currencyId: '',
-            colors: []
+            colors: [],
+            creating: false
             // productDets: {}
         }
     }
 
     setProductImages = (images) => {
-        this.setState({prodctImages: images})
+
+        this.setState({prodctImages: this.state.prodctImages.concat(images)}, () => {
+            console.log(this.state.prodctImages)
+        })
     }
     submit = () => {
+        this.setState({creating: true})
         this.validate().then(() => {
             if (!this.state.error === true) {
                 APICall('/products/new-product/', 'post', this.state.product_info).then(resp => {
+                    resp = JSON.parse(JSON.stringify(resp)).data
                     message.success(`product created!`);
-                    this.props.closeDrawer()
+                    this.props.closeDrawer();
+                    this.props.showCreatedProduct(resp ? resp.id : '', true);
+                    this.setState({creating: false})
                 }).catch(err => {
-
+                    this.setState({creating: false})
                     message.error(err.data && err.data.meta ? err.meta.message : 'API Error');
                 })
             }
@@ -64,7 +72,8 @@ class NewProduct extends Component {
         product_info.categoryId = this.state.categoryId;
         product_info.colors = this.state.colors;
         return this.setState({product_info}, () => {
-            let required_fields = ['name', 'description', 'price', 'currencyId', 'categoryId'];
+            let required_fields = ['name', 'description', 'price', 'currencyId', 'categoryId', 'images', 'colors'];
+
             return required_fields.map(req => {
                 if (!this.state.product_info[req]) {
                     message.error(`${req} is a compulsory field`);
@@ -81,11 +90,13 @@ class NewProduct extends Component {
 
 
         return (
-            <Select onChange={(currencyId) => {
-                this.setState({currencyId})
-            }} name={'currencyId'}
-                    defaultValue={this.state.currencyId}
-                    style={{width: 150}}>
+            <Select
+                placeholder='Select Currency'
+                onChange={(currencyId) => {
+                    this.setState({currencyId})
+                }} name={'currencyId'}
+                // defaultValue={this.state.currencyId}
+                style={{width: 150}}>
                 {
                     currencies.map((currency, i) => {
                         return <Option key={i} value={currency.id}>{currency.symbol} - {currency.name}</Option>
@@ -128,22 +139,24 @@ class NewProduct extends Component {
                                                                         isDefaultRequiredValue: 'This Field is required'
                                                                     }} onChange={this.onChange}
                                                                     name={'name'}
-                                                                    placeholder={'Product Name'}/></div>
+                                                                    placeholder={'Product Name (required)'}/></div>
                                 <div className={'padding-2'}><Input required
+                                                                    type={'number'}
                                                                     validationErrors={{
                                                                         isDefaultRequiredValue: 'This Field is required'
                                                                     }} onChange={this.onChange} name={'price'}
                                                                     addonBefore={this.getCurrencies()}
-                                                                    placeholder={'Price'}/></div>
+                                                                    placeholder={'Price (required)'}/></div>
                                 <div className={'padding-2'}><Input.TextArea required
                                                                              validationErrors={{
                                                                                  isDefaultRequiredValue: 'This Field is required'
                                                                              }} onChange={this.onChange}
                                                                              name={'description'}
-                                                                             placeholder={'Product Description'}/></div>
+                                                                             placeholder={'Product Description (required)'}/>
+                                </div>
                                 <div className={'padding-2'}>
                                     <label>
-                                        <b>Product Category</b>
+                                        <b>Product Category *</b>
                                         <Select required
                                                 validationErrors={{
                                                     isDefaultRequiredValue: 'This Field is required'
@@ -164,14 +177,14 @@ class NewProduct extends Component {
                                 </div>
                                 <div className={'padding-2'}>
                                     <label>
-                                        <b>Colors Available</b>
+                                        <b>Colors Available *</b>
                                         <Select
                                             onChange={(colors) => {
                                                 this.setState({colors})
                                             }} name={'colors'}
                                             mode="multiple"
-                                            placeholder="Please select"
-                                            defaultValue={this.props.colors ? [this.props.colors[0].id] : []}
+                                            placeholder="Please select colors available"
+
                                             size={'default'}
                                             //onChange={handleChange}
                                             style={{width: '100%'}}
@@ -185,7 +198,10 @@ class NewProduct extends Component {
                                 </div>
                                 <div className={'padding-2'}>
                                     <label>
-                                        <b>Product Images</b>
+                                        <b>Product Images *
+                                            <small>(at least 1 required)
+                                            </small>
+                                        </b>
 
                                     </label>
                                     <ImageUpload setProductImages={this.setProductImages}/>
@@ -213,8 +229,16 @@ class NewProduct extends Component {
                                     </Button>
                                     <Button
                                         onClick={this.submit}
-                                        disabled={!this.state.currencyId || !this.state.categoryId || !this.state.productDets}
-                                        type="primary">Save Product</Button>
+                                        disabled={!this.state.currencyId ||
+                                        !this.state.categoryId ||
+                                        !this.state.productDets ||
+                                        !this.state.prodctImages ||
+                                        this.state.prodctImages.length < 1 ||
+                                        !this.state.colors ||
+                                        this.state.colors.length < 1
+                                        }
+                                        type="primary">Save Product&nbsp;{this.state.creating === true ?
+                                        <Spin/> : ''}</Button>
                                 </div>
 
                             </form>

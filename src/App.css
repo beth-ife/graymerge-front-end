@@ -11,6 +11,7 @@
 
 .main-product-image {
     width: 100%;
+    max-height: 95%;
 }
 
 .flex {
@@ -23,6 +24,21 @@
 
 .sub-product-image {
     width: 100px;
+    height: 72%;
+    padding: 10%;
+    margin: 2%;
+}
+
+.img-thumbnail {
+    cursor: pointer;
+}
+
+.centered-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
 }
 
 .height-30 {
@@ -37,7 +53,7 @@
     padding: 2%;
 }
 
-.sentence-case{
+.sentence-case {
     text-transform: capitalize;
 }
 

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import {Table, Button, message} from 'antd';
+import {Table, Button, message, Spin} from 'antd';
 import ProductDetails from "./ProductDetails";
 import NewProduct from "./NewProduct";
 import {APICall} from "../global/api_calls";
@@ -27,16 +27,22 @@ class Products extends Component {
             data: [],
             currencies: [],
             isVisible: false,
-            productId: ''
+            productId: '',
+            loading: true
 
         }
     }
 
     closeDrawer = () => {
         this.setState({
-            isVisible: false,
-
+            isVisible: false
         });
+
+        if (this.state.reload === true) {
+            this.getProducts()
+        }
+
+
     };
     closePDrawer = () => {
         this.setState({
@@ -45,19 +51,19 @@ class Products extends Component {
         });
     };
 
-    showDrawer = (productId) => {
+    showDrawer = (productId, reload = false) => {
         this.setState({productId}, () => {
             //get product details and pass down to drawer
             APICall('/products/view-one-product/' + this.state.productId, 'get').then(resp => {
-                console.log(resp.data)
-                this.setState({current_product: resp.data,},()=>{
+
+                this.setState({current_product: resp.data,}, () => {
                     this.setState({isVisible: true})
-                } )
+                })
             }).catch(err => {
 
                 message.error(err.data && err.data.meta ? err.meta.message : 'API Error');
             })
-            //this.setState({isVisible: true})
+            this.setState({reload})
         })
     }
 
@@ -92,6 +98,9 @@ class Products extends Component {
     }
 
     getProducts = () => {
+        this.setState({
+            loading: true
+        })
         APICall('/products/view-products/', 'get').then(resp => {
             this.setState({
                 data: resp.data.map(product => {
@@ -102,8 +111,10 @@ class Products extends Component {
                     product.image = (<img style={{width: '20%'}}
                                           src={product.images[0] ? product.images[0].image : ''}/>);
 
+
                     return product;
-                })
+                }),
+                loading: false
             })
         }).catch(err => {
 
@@ -122,19 +133,25 @@ class Products extends Component {
 
     render() {
         return (
-            <div>
-                <div style={{marginBottom: '3%', display: 'flex', justifyContent: 'flex-end'}}><Button
-                    onClick={this.showNewPDrawer}>New Product</Button></div>
-                <Table columns={columns} dataSource={this.state.data}/>
-                <ProductDetails product={this.state.current_product} closeDrawer={this.closeDrawer}
-                                productId={this.state.productId}
-                                drawer_visible={this.state.isVisible}/>
-                <NewProduct colors={this.state.colors} categories={this.state.categories}
-                            currencies={this.state.currencies}
-                            closeDrawer={this.closePDrawer}
-                            productId={this.state.productId}
-                            drawer_visible_new={this.state.isVisible_new}/>
-            </div>
+            this.state.loading === true ?
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}><Spin/></div> :
+                <div>
+
+                    <div style={{marginBottom: '3%', display: 'flex', justifyContent: 'flex-end'}}>
+                        <Button
+                            onClick={this.showNewPDrawer}>New Product</Button></div>
+                    <Table columns={columns} dataSource={this.state.data}/>
+                    <ProductDetails product={this.state.current_product} closeDrawer={this.closeDrawer}
+                                    productId={this.state.productId}
+                                    drawer_visible={this.state.isVisible}/>
+                    <NewProduct
+                        showCreatedProduct={this.showDrawer}
+                        colors={this.state.colors} categories={this.state.categories}
+                        currencies={this.state.currencies}
+                        closeDrawer={this.closePDrawer}
+                        productId={this.state.productId}
+                        drawer_visible_new={this.state.isVisible_new}/>
+                </div>
         );
     }
 }

@@ -22,14 +22,14 @@ class ImageUpload extends Component {
     handleChange = ({fileList}) => this.setState({fileList}, () => {
         let files = JSON.parse(JSON.stringify(this.state.files_to_upload));
         fileList.map(file => {
-            console.log(JSON.parse(JSON.stringify(file)))
+
             if (file && file.response && file.response.file) {
-                ;
-                this.props.setProductImages(files.concat(file.response.file));
+                console.log('new file',file)
+                this.props.setProductImages(file.response.file[0]);
                 this.setState({files_to_upload: files})
             }
         })
-        console.log(fileList)
+
     })
 
     render() {

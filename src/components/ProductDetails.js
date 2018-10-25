@@ -203,10 +203,11 @@ class ProductDetails extends Component {
             >
                 {Product ? <div><p style={{...pStyle, marginBottom: 24}}>Product Details</p>
                     <Row>
-                        <Col span={12}>
-                            <div>
-                                <img className={'main-product-image'}
-                                     src={Product.images[0] ? Product.images[0].image : ''}/>
+                        <Col span={12} style={{height: '40vh'}}>
+                            <div style={{height: '100%'}}>
+                                <img
+                                    className={'main-product-image'}
+                                    src={Product.images[0] ? this.state.main_product_image || Product.images[0].image : ''}/>
                             </div>
                         </Col>
                         <Col span={12} style={{height: '40vh'}} className={'padding-2 flex row-flex'}>
@@ -228,7 +229,7 @@ class ProductDetails extends Component {
                                     <Col span={2} style={{backgroundColor: 'blue', margin: '2%'}}/>
                                 </Row>
                                 <Row className={'flex height-30'}>
-                                    <Col span={12} style={{display:'flex',justifyContent:'center'}}>
+                                    <Col span={12} style={{display: 'flex', justifyContent: 'center'}}>
                                         <h1>
                                             {Product.currency.symbol}&nbsp;{Product.price}
                                         </h1>
@@ -243,23 +244,37 @@ class ProductDetails extends Component {
                     <Divider/>
 
                     <Row>
-                        <Col span={24} className={'flex'}>
+                        <Col span={24} style={{width: '90%', margin: 'auto', overflowX: 'auto'}} className={'flex'}>
                             {Product.images.map((image, index) => {
-                                return <div>
-                                    <img className={'sub-product-image'}
-                                         src={image.image}/>
+                                return <div
+                                    key={index}
+                                    onMouseEnter={() => {
+                                        this.setState({main_product_image: image.image})
+                                    }}
+                                    onClick={() => {
+                                        this.setState({main_product_image: image.image})
+                                    }
+                                    } className={'centered-div img-thumbnail'}>
+                                    <img
+
+                                        className={'sub-product-image'}
+                                        src={image.image}
+                                    />
                                 </div>
                             })}
 
 
                         </Col>
-                    </Row>
+                        <
+                        /Row>
 
-                </div> : 'Loading..'}
+                </div> :
+                    'Loading..'
+                    }
 
-            </Drawer>
-        );
-    }
-}
+                    </Drawer>
+                    );
+                    }
+                    }
 
-export default ProductDetails;
+                    export default ProductDetails;
